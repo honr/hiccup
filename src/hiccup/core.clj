@@ -1,13 +1,16 @@
 (ns hiccup.core
   "Library for rendering a tree of vectors into a string of HTML.
   Pre-compiles where possible for performance."
-  (:use [clojure.contrib.def :only (defvar defvar-)]
-        [clojure.contrib.java-utils :only (as-str)])
   (:import [clojure.lang IPersistentVector
                          ISeq]))
 
-(defvar *html-mode* :xml
-  "Determines the way tags and attributes are formatted. Defaults to :xml.")
+(defn as-str [x]
+  (if (instance? clojure.lang.Named x)
+    (name x)
+    (str x)))
+
+(def ^{:doc "Determines the way tags and attributes are formatted. Defaults to :xml."}
+  *html-mode* :xml)
 
 (defn escape-html
   "Change special characters into HTML character entities."
@@ -44,15 +47,15 @@
   (apply str
     (sort (map render-attribute attrs))))
 
-(defvar- re-tag
-  #"([^\s\.#]+)(?:#([^\s\.#]+))?(?:\.([^\s#]+))?"
-  "Regular expression that parses a CSS-style id and class from a tag name.")
+(def- ^{:doc "Regular expression that parses a CSS-style id and class from a tag name."}
+  re-tag
+  #"([^\s\.#]+)(?:#([^\s\.#]+))?(?:\.([^\s#]+))?")
 
-(defvar- container-tags
+(def- ^{:doc "A list of tags that need an explicit ending tag when rendered."}
+  container-tags
   #{"a" "b" "body" "dd" "div" "dl" "dt" "em" "fieldset" "form" "h1" "h2" "h3"
     "h4" "h5" "h6" "head" "html" "i" "label" "li" "ol" "pre" "script" "span"
-    "strong" "style" "textarea" "ul" "option"}
-  "A list of tags that need an explicit ending tag when rendered.")
+    "strong" "style" "textarea" "ul" "option"})
 
 (defn- normalize-element
   "Ensure a tag vector is of the form [tag-name attrs content]."
